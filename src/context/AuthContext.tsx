@@ -85,7 +85,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       await signInWithPopup(auth, googleAuthProvider);
     } catch (err: any) {
-      if (err?.code !== 'auth/popup-closed-by-user') {
+      if (err?.code === 'auth/unauthorized-domain') {
+        setError(
+          `Domain "${window.location.hostname}" belum ditambahkan ke Authorized Domains di Firebase Console > Authentication > Settings.`
+        );
+      } else if (err?.code !== 'auth/popup-closed-by-user') {
         setError(err?.message || 'Gagal login dengan Google.');
       }
     }

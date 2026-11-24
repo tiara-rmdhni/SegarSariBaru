@@ -1291,6 +1291,25 @@ export function AdminPage() {
                 />
               </div>
 
+              <div>
+                <label className="block text-xs font-bold mb-1">
+                  URL Gambar (Bisa pilih gambar bawaan atau URL HTTPS)
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={pForm.imageUrl}
+                  onChange={(e) =>
+                    setPForm((prev) => ({
+                      ...prev,
+                      imageUrl: e.target.value,
+                    }))
+                  }
+                  placeholder="/images/products/alpukat.jpg atau https://..."
+                  className="w-full px-3 py-2 rounded-xl border border-[#d6e3da] text-xs font-mono-num"
+                />
+              </div>
+
               <div className="flex items-center gap-6 text-sm">
                 <label className="inline-flex items-center gap-2 cursor-pointer">
                   <input

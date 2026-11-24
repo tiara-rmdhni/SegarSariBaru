@@ -1,5 +1,5 @@
 import { eq } from 'drizzle-orm';
-import { db } from './index.ts';
+import { db, isDatabaseConfigured } from './index.ts';
 import { users } from './schema.ts';
 
 const DEFAULT_OWNER_EMAIL = 'tiara.ramadhani1706@gmail.com';
@@ -20,10 +20,23 @@ export async function getOrCreateUser(
   email: string,
   name = ''
 ) {
+  const normalizedEmail = email.trim().toLowerCase();
+  const adminEmails = getConfiguredAdminEmails();
+  const isConfiguredAdmin = adminEmails.has(normalizedEmail);
+
+  if (!isDatabaseConfigured()) {
+    return {
+      id: 0,
+      uid,
+      email: normalizedEmail,
+      name,
+      role: isConfiguredAdmin ? 'admin' : 'customer',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+  }
+
   try {
-    const normalizedEmail = email.trim().toLowerCase();
-    const adminEmails = getConfiguredAdminEmails();
-    const isConfiguredAdmin = adminEmails.has(normalizedEmail);
 
     const existing = await db
       .select()

@@ -10,17 +10,24 @@ export function HomePage() {
   const { settings } = useStore();
   const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   useEffect(() => {
     let active = true;
     fetch('/api/products?featured=true')
-      .then((res) => res.json())
+      .then(async (res) => {
+        if (!res.ok) throw new Error('Gagal memuat menu unggulan.');
+        return res.json();
+      })
       .then((data) => {
         if (active && Array.isArray(data.products)) {
           setFeaturedProducts(data.products.slice(0, 6));
         }
       })
-      .catch((err) => console.error('Failed to load featured products:', err))
+      .catch((err) => {
+        console.error('Failed to load featured products:', err);
+        if (active) setLoadError(err.message || 'Gagal memuat menu.');
+      })
       .finally(() => {
         if (active) setLoading(false);
       });
@@ -131,7 +138,11 @@ export function HomePage() {
           </Link>
         </div>
 
-        {loading ? (
+        {loadError ? (
+          <div className="p-6 rounded-2xl border border-red-200 bg-red-50 text-sm text-red-700">
+            {loadError}
+          </div>
+        ) : loading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {[1, 2, 3].map((n) => (
               <div

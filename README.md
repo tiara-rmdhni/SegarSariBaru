@@ -50,15 +50,24 @@ Aplikasi web full-stack untuk UMKM **Segar Sari** (jus buah segar alami). Dibang
 ---
 
 ## Panduan Deploy ke GitHub & Vercel
+Aplikasi sudah dilengkapi `vercel.json` dan Serverless API entrypoint (`api/index.ts`) sehingga rute `/api/*`, katalog menu, keranjang, checkout, analisis foto AI, serta navigasi SPA bekerja penuh di Vercel.
+
 1. **Push ke GitHub**:
    - Pastikan file `.env*` dan folder `uploads/` tetap diabaikan oleh `.gitignore`.
    - Commit dan push repositori ke GitHub Anda.
-2. **Siapkan Database PostgreSQL (Supabase / Cloud SQL)**:
-   - Jika menggunakan Supabase, jalankan skema dan kebijakan RLS pada `supabase/migrations/001_initial_schema.sql` dan `supabase/seed.sql` melalui SQL Editor Supabase.
-3. **Deploy di Vercel**:
-   - Hubungkan repositori GitHub di dashboard Vercel.
-   - Tambahkan Environment Variables di Vercel (`GEMINI_API_KEY` dari Google AI Studio Free Tier, `ADMIN_EMAILS`, serta kredensial database).
-   - Build Command: `npm run build` · Start Command: `npm run start`.
-4. **Backup & Pemulihan**:
+2. **Siapkan Database PostgreSQL (misal Supabase)**:
+   - Jalankan `supabase/migrations/001_initial_schema.sql` dan `supabase/seed.sql` melalui SQL Editor Supabase (atau hubungkan ke PostgreSQL Anda; jika tabel sudah ada dan masih kosong, server akan mengisi 12 menu awal secara otomatis).
+3. **Atur Environment Variables di Vercel** (*Project Settings > Environment Variables*):
+   - `GEMINI_API_KEY`: API key gratis dari Google AI Studio (untuk analisis foto `gemini-4-hydrogen`).
+   - `ADMIN_EMAILS`: Email Google yang diizinkan mengakses `/admin`.
+   - Kredensial PostgreSQL agar pesanan & admin tersimpan permanen:
+     - `SQL_HOST` (host database Supabase/Postgres Anda)
+     - `SQL_PORT` (`5432` atau `6543`)
+     - `SQL_USER`, `SQL_PASSWORD`, `SQL_DB_NAME`
+     - `SQL_SSL` (`true` untuk koneksi eksternal ke Supabase/Neon)
+   - *Catatan*: Apabila variabel database `SQL_*` belum diisi saat pertama kali deploy ke Vercel, katalog 12 menu dan fitur analisis foto tetap tampil menggunakan katalog bawaan agar halaman publik tidak kosong.
+4. **Daftarkan Domain Vercel di Firebase Auth** (untuk login `/admin`):
+   - Buka **Firebase Console > Authentication > Settings > Authorized domains**, lalu tambahkan domain Vercel Anda (misalnya `nama-app.vercel.app`).
+5. **Backup & Pemulihan**:
    - Aktifkan backup otomatis harian pada instance Cloud SQL / Supabase dan lakukan uji *restore* secara berkala.
    - Jika terjadi insiden kebocoran kunci, segera lakukan rotasi `GEMINI_API_KEY` dan periksa tabel `audit_logs` di `/admin`.

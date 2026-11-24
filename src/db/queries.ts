@@ -10,7 +10,12 @@ import {
   or,
   sql,
 } from 'drizzle-orm';
-import { db } from './index.ts';
+import {
+  DEFAULT_CATEGORIES,
+  DEFAULT_PRODUCTS,
+  DEFAULT_STORE_SETTINGS,
+} from '../data/fallbackCatalog.ts';
+import { db, isDatabaseConfigured } from './index.ts';
 import {
   auditLogs,
   categories,
@@ -38,8 +43,76 @@ export class AppError extends Error {
   }
 }
 
-export async function getCategories() {
+let seedChecked = false;
+
+async function ensureSeededIfEmpty() {
+  if (seedChecked || !isDatabaseConfigured()) return;
   try {
+    const existingCats = await db.select({ id: categories.id }).from(categories).limit(1);
+    if (existingCats.length > 0) {
+      seedChecked = true;
+      return;
+    }
+
+    for (const cat of DEFAULT_CATEGORIES) {
+      await db
+        .insert(categories)
+        .values({ name: cat.name, slug: cat.slug, sortOrder: cat.sortOrder })
+        .onConflictDoNothing();
+    }
+
+    const dbCats = await db.select().from(categories);
+    const catBySlug = new Map(dbCats.map((c) => [c.slug, c.id]));
+
+    for (const prod of DEFAULT_PRODUCTS) {
+      const catId = catBySlug.get(prod.categorySlug);
+      if (!catId) continue;
+      await db
+        .insert(products)
+        .values({
+          categoryId: catId,
+          name: prod.name,
+          slug: prod.slug,
+          description: prod.description,
+          price: prod.price,
+          stock: prod.stock,
+          imageUrl: prod.imageUrl,
+          isFeatured: prod.isFeatured,
+          isAvailable: prod.isAvailable,
+        })
+        .onConflictDoNothing();
+    }
+
+    const existingSettings = await db
+      .select({ id: storeSettings.id })
+      .from(storeSettings)
+      .limit(1);
+    if (existingSettings.length === 0) {
+      await db.insert(storeSettings).values({
+        storeName: DEFAULT_STORE_SETTINGS.storeName,
+        description: DEFAULT_STORE_SETTINGS.description,
+        whatsappNumber: DEFAULT_STORE_SETTINGS.whatsappNumber,
+        address: DEFAULT_STORE_SETTINGS.address,
+        openingHours: DEFAULT_STORE_SETTINGS.openingHours,
+        email: DEFAULT_STORE_SETTINGS.email,
+        instagramHandle: DEFAULT_STORE_SETTINGS.instagramHandle,
+        logoUrl: DEFAULT_STORE_SETTINGS.logoUrl,
+        bannerUrl: DEFAULT_STORE_SETTINGS.bannerUrl,
+      });
+    }
+
+    seedChecked = true;
+  } catch (err) {
+    console.error('Auto-seed check failed:', err);
+  }
+}
+
+export async function getCategories() {
+  if (!isDatabaseConfigured()) {
+    return DEFAULT_CATEGORIES;
+  }
+  try {
+    await ensureSeededIfEmpty();
     return await db
       .select()
       .from(categories)
@@ -55,7 +128,27 @@ export async function getPublicProducts(filters?: {
   search?: string;
   featuredOnly?: boolean;
 }) {
+  if (!isDatabaseConfigured()) {
+    return DEFAULT_PRODUCTS.filter((p) => {
+      if (filters?.categorySlug && filters.categorySlug !== 'semua') {
+        if (p.categorySlug !== filters.categorySlug) return false;
+      }
+      if (filters?.featuredOnly && !p.isFeatured) return false;
+      if (filters?.search && filters.search.trim()) {
+        const q = filters.search.trim().toLowerCase();
+        if (
+          !p.name.toLowerCase().includes(q) &&
+          !p.description.toLowerCase().includes(q)
+        ) {
+          return false;
+        }
+      }
+      return true;
+    });
+  }
+
   try {
+    await ensureSeededIfEmpty();
     const conditions = [eq(products.isAvailable, true)];
 
     if (filters?.categorySlug && filters.categorySlug !== 'semua') {
@@ -109,7 +202,12 @@ export async function getPublicProducts(filters?: {
 }
 
 export async function getProductBySlug(slug: string) {
+  if (!isDatabaseConfigured()) {
+    return DEFAULT_PRODUCTS.find((p) => p.slug === slug) ?? null;
+  }
+
   try {
+    await ensureSeededIfEmpty();
     const rows = await db
       .select({
         id: products.id,
@@ -138,7 +236,12 @@ export async function getProductBySlug(slug: string) {
 }
 
 export async function getStoreSettings() {
+  if (!isDatabaseConfigured()) {
+    return DEFAULT_STORE_SETTINGS;
+  }
+
   try {
+    await ensureSeededIfEmpty();
     const rows = await db.select().from(storeSettings).limit(1);
     if (rows.length > 0) return rows[0];
 
@@ -215,7 +318,82 @@ export async function createOrderTransaction(input: {
   notes: string;
   items: Array<{ productId: number; quantity: number }>;
 }) {
+  if (!isDatabaseConfigured()) {
+    const prodMap = new Map(DEFAULT_PRODUCTS.map((p) => [p.id, p]));
+    const qtyByProduct = new Map<number, number>();
+    for (const item of input.items) {
+      qtyByProduct.set(
+        item.productId,
+        (qtyByProduct.get(item.productId) ?? 0) + item.quantity
+      );
+    }
+
+    let subtotal = 0;
+    const orderItemsList: Array<{
+      id: number;
+      orderId: number;
+      productId: number;
+      productName: string;
+      unitPrice: number;
+      quantity: number;
+      lineTotal: number;
+    }> = [];
+
+    let idx = 1;
+    for (const [productId, quantity] of qtyByProduct.entries()) {
+      const product = prodMap.get(productId);
+      if (!product) {
+        throw new AppError(
+          'Salah satu produk pada keranjang tidak ditemukan.',
+          404
+        );
+      }
+      const lineTotal = product.price * quantity;
+      subtotal += lineTotal;
+      orderItemsList.push({
+        id: idx++,
+        orderId: 0,
+        productId: product.id,
+        productName: product.name,
+        unitPrice: product.price,
+        quantity,
+        lineTotal,
+      });
+    }
+
+    const dateTag = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+    const suffix = crypto.randomBytes(3).toString('hex').toUpperCase();
+    const orderNumber = `SS-${dateTag}-${suffix}`;
+    const createdOrder = {
+      id: 0,
+      orderNumber,
+      idempotencyKey: input.idempotencyKey,
+      customerName: input.customerName,
+      customerWhatsapp: input.customerWhatsapp,
+      customerAddress: input.customerAddress,
+      fulfillmentMethod: input.fulfillmentMethod,
+      notes: input.notes,
+      subtotal,
+      totalAmount: subtotal,
+      status: 'Menunggu konfirmasi',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+
+    return {
+      order: createdOrder,
+      items: orderItemsList,
+      whatsappUrl: buildWhatsappUrl(
+        DEFAULT_STORE_SETTINGS.whatsappNumber,
+        createdOrder,
+        orderItemsList
+      ),
+      isDuplicate: false,
+    };
+  }
+
   try {
+    await ensureSeededIfEmpty();
     const result = await db.transaction(async (tx) => {
       const existing = await tx
         .select()
@@ -376,6 +554,7 @@ export async function logAuditEvent(entry: {
   metadata?: Record<string, unknown>;
   ipAddress?: string;
 }) {
+  if (!isDatabaseConfigured()) return;
   try {
     await db.insert(auditLogs).values({
       actorUid: entry.actorUid,
@@ -391,8 +570,19 @@ export async function logAuditEvent(entry: {
   }
 }
 
+function assertDbForAdmin() {
+  if (!isDatabaseConfigured()) {
+    throw new AppError(
+      'Database PostgreSQL belum dikonfigurasi pada environment Vercel (SQL_HOST, SQL_USER, SQL_PASSWORD, SQL_DB_NAME).',
+      503
+    );
+  }
+}
+
 export async function getAdminOverview() {
+  assertDbForAdmin();
   try {
+    await ensureSeededIfEmpty();
     const [allProducts, allOrders, recentOrders] = await Promise.all([
       db.select({ id: products.id, isAvailable: products.isAvailable }).from(products),
       db
@@ -430,13 +620,16 @@ export async function getAdminOverview() {
       recentOrders,
     };
   } catch (error) {
+    if (error instanceof AppError) throw error;
     console.error('getAdminOverview failed:', error);
     throw new Error('Gagal memuat ringkasan dashboard.', { cause: error });
   }
 }
 
 export async function adminListProducts() {
+  assertDbForAdmin();
   try {
+    await ensureSeededIfEmpty();
     return await db
       .select({
         id: products.id,
@@ -458,6 +651,7 @@ export async function adminListProducts() {
       .innerJoin(categories, eq(products.categoryId, categories.id))
       .orderBy(categories.sortOrder, products.id);
   } catch (error) {
+    if (error instanceof AppError) throw error;
     console.error('adminListProducts failed:', error);
     throw new Error('Gagal memuat data produk admin.', { cause: error });
   }
@@ -474,6 +668,7 @@ export async function adminCreateProduct(data: {
   isFeatured: boolean;
   isAvailable: boolean;
 }) {
+  assertDbForAdmin();
   try {
     const existingSlug = await db
       .select({ id: products.id })
@@ -511,6 +706,7 @@ export async function adminUpdateProduct(
     isAvailable: boolean;
   }>
 ) {
+  assertDbForAdmin();
   try {
     if (data.slug) {
       const existing = await db
@@ -545,6 +741,7 @@ export async function adminUpdateProduct(
 }
 
 export async function adminDeleteProduct(id: number) {
+  assertDbForAdmin();
   try {
     const [deleted] = await db
       .delete(products)
@@ -567,6 +764,7 @@ export async function adminListOrders(filters?: {
   dateFrom?: string;
   dateTo?: string;
 }) {
+  assertDbForAdmin();
   try {
     const conditions = [];
 
@@ -631,6 +829,7 @@ export async function adminListOrders(filters?: {
       items: itemsByOrder.get(o.id) ?? [],
     }));
   } catch (error) {
+    if (error instanceof AppError) throw error;
     console.error('adminListOrders failed:', error);
     throw new Error('Gagal memuat daftar pesanan.', { cause: error });
   }
@@ -640,6 +839,7 @@ export async function adminUpdateOrderStatus(
   orderId: number,
   nextStatus: OrderStatus
 ) {
+  assertDbForAdmin();
   try {
     return await db.transaction(async (tx) => {
       const existing = await tx
@@ -729,6 +929,7 @@ export async function adminUpdateStoreSettings(data: {
   logoUrl: string;
   bannerUrl: string;
 }) {
+  assertDbForAdmin();
   try {
     const existing = await db.select().from(storeSettings).limit(1);
     if (existing.length === 0) {
@@ -750,12 +951,14 @@ export async function adminUpdateStoreSettings(data: {
 
     return updated;
   } catch (error) {
+    if (error instanceof AppError) throw error;
     console.error('adminUpdateStoreSettings failed:', error);
     throw new Error('Gagal menyimpan pengaturan toko.', { cause: error });
   }
 }
 
 export async function adminListAuditLogs(limit = 40) {
+  assertDbForAdmin();
   try {
     return await db
       .select()
@@ -763,6 +966,7 @@ export async function adminListAuditLogs(limit = 40) {
       .orderBy(desc(auditLogs.createdAt))
       .limit(limit);
   } catch (error) {
+    if (error instanceof AppError) throw error;
     console.error('adminListAuditLogs failed:', error);
     throw new Error('Gagal memuat log aktivitas.', { cause: error });
   }
