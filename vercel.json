@@ -1,6 +1,11 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "vite",
   "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "/api/index?__path=$1"
+    },
     {
       "source": "/((?!api/|assets/|images/|uploads/|favicon.ico).*)",
       "destination": "/index.html"
