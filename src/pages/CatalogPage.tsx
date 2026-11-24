@@ -23,7 +23,13 @@ export function CatalogPage() {
     setLoading(true);
     fetch('/api/products')
       .then(async (res) => {
-        if (!res.ok) throw new Error('Gagal memuat katalog menu.');
+        if (!res.ok) {
+          const errBody = await res.json().catch(() => null);
+          throw new Error(
+            errBody?.error ||
+              `Gagal memuat katalog menu (HTTP ${res.status}).`
+          );
+        }
         return res.json();
       })
       .then((data) => {
