@@ -4,6 +4,7 @@ import { ArrowLeft, Check, Minus, Plus, ShoppingBag } from 'lucide-react';
 import { ProductCard } from '../components/ProductCard';
 import { ProductImage } from '../components/ProductImage';
 import { useCart } from '../context/CartContext';
+import { DEFAULT_PRODUCTS } from '../data/fallbackCatalog';
 import { formatRupiah, type Product } from '../types';
 
 export function ProductDetailPage() {
@@ -11,17 +12,39 @@ export function ProductDetailPage() {
   const navigate = useNavigate();
   const { addItem, setDrawerOpen } = useCart();
 
-  const [product, setProduct] = useState<Product | null>(null);
-  const [related, setRelated] = useState<Product[]>([]);
+  const fallbackProduct = slug
+    ? (DEFAULT_PRODUCTS.find((p) => p.slug === slug) ?? null)
+    : null;
+  const [product, setProduct] = useState<Product | null>(fallbackProduct);
+  const [related, setRelated] = useState<Product[]>(() =>
+    fallbackProduct
+      ? DEFAULT_PRODUCTS.filter(
+          (p) =>
+            p.slug !== fallbackProduct.slug &&
+            p.categorySlug === fallbackProduct.categorySlug
+        ).slice(0, 3)
+      : []
+  );
   const [quantity, setQuantity] = useState(1);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!fallbackProduct);
   const [error, setError] = useState<string | null>(null);
   const [addedFeedback, setAddedFeedback] = useState(false);
 
   useEffect(() => {
     if (!slug) return;
     let active = true;
-    setLoading(true);
+    const localMatch = DEFAULT_PRODUCTS.find((p) => p.slug === slug) ?? null;
+    if (localMatch) {
+      setProduct(localMatch);
+      setRelated(
+        DEFAULT_PRODUCTS.filter(
+          (p) => p.slug !== slug && p.categorySlug === localMatch.categorySlug
+        ).slice(0, 3)
+      );
+      setLoading(false);
+    } else {
+      setLoading(true);
+    }
     setError(null);
     setQuantity(1);
 
@@ -31,13 +54,19 @@ export function ProductDetailPage() {
     ])
       .then(async ([detailRes, listRes]) => {
         if (!detailRes.ok) {
-          throw new Error('Produk tidak ditemukan.');
+          if (detailRes.status === 404 && !localMatch) {
+            throw new Error('Produk tidak ditemukan.');
+          }
+          return;
         }
-        const detailData = await detailRes.json();
-        const listData = listRes.ok ? await listRes.json() : { products: [] };
+        const detailData = await detailRes.json().catch(() => null);
+        if (!detailData?.product) return;
+        const listData = listRes.ok
+          ? await listRes.json().catch(() => ({ products: [] }))
+          : { products: DEFAULT_PRODUCTS };
         if (active) {
           setProduct(detailData.product);
-          const others = (listData.products || []).filter(
+          const others = (listData.products || DEFAULT_PRODUCTS).filter(
             (p: Product) =>
               p.slug !== slug &&
               p.categorySlug === detailData.product.categorySlug
@@ -46,7 +75,9 @@ export function ProductDetailPage() {
         }
       })
       .catch((err) => {
-        if (active) setError(err.message || 'Gagal memuat produk.');
+        if (active && !localMatch) {
+          setError(err.message || 'Gagal memuat produk.');
+        }
       })
       .finally(() => {
         if (active) setLoading(false);

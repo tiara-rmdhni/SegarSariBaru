@@ -4,29 +4,32 @@ import { ArrowRight, Camera, Citrus, Clock, Leaf } from 'lucide-react';
 import { ProductCard } from '../components/ProductCard';
 import { ProductImage } from '../components/ProductImage';
 import { useStore } from '../context/StoreContext';
+import { DEFAULT_PRODUCTS } from '../data/fallbackCatalog';
 import type { Product } from '../types';
+
+const FALLBACK_FEATURED = DEFAULT_PRODUCTS.filter((p) => p.isFeatured).slice(0, 6);
 
 export function HomePage() {
   const { settings } = useStore();
-  const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [featuredProducts, setFeaturedProducts] = useState<Product[]>(FALLBACK_FEATURED);
+  const [loading, setLoading] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
 
   useEffect(() => {
     let active = true;
     fetch('/api/products?featured=true')
       .then(async (res) => {
-        if (!res.ok) throw new Error('Gagal memuat menu unggulan.');
-        return res.json();
+        if (!res.ok) return null;
+        return res.json().catch(() => null);
       })
       .then((data) => {
-        if (active && Array.isArray(data.products)) {
+        if (active && Array.isArray(data?.products) && data.products.length > 0) {
           setFeaturedProducts(data.products.slice(0, 6));
+          setLoadError(null);
         }
       })
-      .catch((err) => {
-        console.error('Failed to load featured products:', err);
-        if (active) setLoadError(err.message || 'Gagal memuat menu.');
+      .catch(() => {
+        // Keep built-in featured catalog fallback when API is unreachable
       })
       .finally(() => {
         if (active) setLoading(false);

@@ -2,7 +2,12 @@ import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { CheckCircle2, ExternalLink, ShoppingBag } from 'lucide-react';
 import { useCart } from '../context/CartContext';
-import { formatRupiah, type OrderItemRecord, type OrderRecord } from '../types';
+import { useStore } from '../context/StoreContext';
+import {
+  formatRupiah,
+  type OrderItemRecord,
+  type OrderRecord,
+} from '../types';
 
 interface CheckoutReceipt {
   order: OrderRecord;
@@ -12,6 +17,7 @@ interface CheckoutReceipt {
 
 export function CheckoutPage() {
   const { items, subtotal, clearCart } = useCart();
+  const { settings } = useStore();
 
   const [idempotencyKey, setIdempotencyKey] = useState<string>(() =>
     typeof crypto !== 'undefined' && crypto.randomUUID
@@ -36,9 +42,82 @@ export function CheckoutPage() {
     [items]
   );
 
+  const buildLocalFallbackReceipt = (): CheckoutReceipt => {
+    const nowIso = new Date().toISOString();
+    const dateTag = nowIso.slice(0, 10).replace(/-/g, '');
+    const suffix = Math.random().toString(36).slice(2, 8).toUpperCase();
+    const orderNumber = `SS-${dateTag}-${suffix}`;
+
+    const orderItemsList: OrderItemRecord[] = items.map((item, idx) => ({
+      id: idx + 1,
+      orderId: 0,
+      productId: item.productId,
+      productName: item.name,
+      unitPrice: item.price,
+      quantity: item.quantity,
+      lineTotal: item.price * item.quantity,
+    }));
+
+    const digits = settings.whatsappNumber.replace(/\D/g, '') || '6281234567890';
+    const normalizedPhone = digits.startsWith('0')
+      ? `62${digits.slice(1)}`
+      : digits;
+
+    const itemLines = orderItemsList
+      .map(
+        (item, idx) =>
+          `${idx + 1}. ${item.productName} x${item.quantity} (${formatRupiah(item.lineTotal)})`
+      )
+      .join('\n');
+
+    const lines = [
+      'Halo Segar Sari, saya ingin mengonfirmasi pesanan:',
+      `No. Pesanan: ${orderNumber}`,
+      `Nama: ${customerName.trim()}`,
+      `WhatsApp: ${customerWhatsapp.trim()}`,
+      `Metode: ${fulfillmentMethod === 'delivery' ? 'Antar Kurir' : 'Ambil di Toko'}`,
+      ...(fulfillmentMethod === 'delivery' && customerAddress.trim()
+        ? [`Alamat: ${customerAddress.trim()}`]
+        : []),
+      '',
+      'Rincian Menu:',
+      itemLines,
+      '',
+      `Total: ${formatRupiah(subtotal)}`,
+      ...(notes.trim() ? [`Catatan: ${notes.trim()}`] : []),
+      '',
+      'Mohon konfirmasi ketersediaan dan instruksi pembayarannya. Terima kasih.',
+    ];
+
+    return {
+      order: {
+        id: 0,
+        orderNumber,
+        customerName: customerName.trim(),
+        customerWhatsapp: customerWhatsapp.trim(),
+        customerAddress:
+          fulfillmentMethod === 'delivery' ? customerAddress.trim() : '',
+        fulfillmentMethod,
+        notes: notes.trim(),
+        subtotal,
+        totalAmount: subtotal,
+        status: 'Menunggu konfirmasi',
+        createdAt: nowIso,
+        updatedAt: nowIso,
+      },
+      items: orderItemsList,
+      whatsappUrl: `https://wa.me/${normalizedPhone}?text=${encodeURIComponent(lines.join('\n'))}`,
+    };
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (submitting || items.length === 0) return;
+
+    if (fulfillmentMethod === 'delivery' && customerAddress.trim().length < 8) {
+      setError('Alamat pengiriman lengkap wajib diisi untuk pengantaran kurir.');
+      return;
+    }
 
     setError(null);
     setSubmitting(true);
@@ -62,9 +141,24 @@ export function CheckoutPage() {
         }),
       });
 
-      const data = await res.json().catch(() => ({}));
+      const contentType = res.headers.get('content-type') || '';
+      const isJson = contentType.includes('application/json');
+      const data = isJson ? await res.json().catch(() => null) : null;
+
       if (!res.ok) {
-        throw new Error(data.error || 'Gagal mengirim pesanan.');
+        if (res.status >= 400 && res.status < 500 && res.status !== 404 && data?.error) {
+          throw new Error(data.error);
+        }
+        // Fallback if backend API is unavailable (e.g. static deployment without serverless API)
+        setReceipt(buildLocalFallbackReceipt());
+        clearCart();
+        return;
+      }
+
+      if (!data?.order) {
+        setReceipt(buildLocalFallbackReceipt());
+        clearCart();
+        return;
       }
 
       setReceipt({
@@ -79,7 +173,13 @@ export function CheckoutPage() {
           : `ss-${Date.now()}`
       );
     } catch (err: any) {
-      setError(err.message || 'Terjadi kesalahan saat memproses pesanan.');
+      if (err instanceof TypeError) {
+        // Network error when backend is unreachable
+        setReceipt(buildLocalFallbackReceipt());
+        clearCart();
+      } else {
+        setError(err.message || 'Terjadi kesalahan saat memproses pesanan.');
+      }
     } finally {
       setSubmitting(false);
     }

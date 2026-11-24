@@ -1,4 +1,8 @@
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
+import {
+  DEFAULT_CATEGORIES,
+  DEFAULT_STORE_SETTINGS,
+} from '../data/fallbackCatalog';
 import type { Category, StoreSettings } from '../types';
 
 interface StoreContextValue {
@@ -9,29 +13,28 @@ interface StoreContextValue {
 }
 
 const defaultSettings: StoreSettings = {
-  storeName: 'Segar Sari',
-  description:
-    'Jus buah 100% alami tanpa gula berlebih dan tanpa bahan pengawet, dibuat segar setiap hari untuk menemani aktivitas sehat Anda.',
-  whatsappNumber: '6281234567890',
-  address: 'Jl. Melati Segar No. 28, Kemang, Jakarta Selatan',
-  openingHours: 'Setiap Hari · 08.00 – 21.00 WIB',
-  email: 'halo@segarsari.id',
-  instagramHandle: '@segarsari.id',
-  logoUrl: '/images/hero-jus.jpg',
-  bannerUrl: '/images/hero-jus.jpg',
+  storeName: DEFAULT_STORE_SETTINGS.storeName,
+  description: DEFAULT_STORE_SETTINGS.description,
+  whatsappNumber: DEFAULT_STORE_SETTINGS.whatsappNumber,
+  address: DEFAULT_STORE_SETTINGS.address,
+  openingHours: DEFAULT_STORE_SETTINGS.openingHours,
+  email: DEFAULT_STORE_SETTINGS.email,
+  instagramHandle: DEFAULT_STORE_SETTINGS.instagramHandle,
+  logoUrl: DEFAULT_STORE_SETTINGS.logoUrl,
+  bannerUrl: DEFAULT_STORE_SETTINGS.bannerUrl,
 };
 
 const StoreContext = createContext<StoreContextValue>({
   settings: defaultSettings,
-  categories: [],
-  loading: true,
+  categories: DEFAULT_CATEGORIES,
+  loading: false,
   refreshStore: async () => {},
 });
 
 export function StoreProvider({ children }: { children: React.ReactNode }) {
   const [settings, setSettings] = useState<StoreSettings>(defaultSettings);
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [categories, setCategories] = useState<Category[]>(DEFAULT_CATEGORIES);
+  const [loading, setLoading] = useState(false);
 
   const refreshStore = useCallback(async () => {
     try {
@@ -40,15 +43,17 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         fetch('/api/categories'),
       ]);
       if (settingsRes.ok) {
-        const sData = await settingsRes.json();
-        if (sData.settings) setSettings(sData.settings);
+        const sData = await settingsRes.json().catch(() => null);
+        if (sData?.settings) setSettings(sData.settings);
       }
       if (catRes.ok) {
-        const cData = await catRes.json();
-        if (Array.isArray(cData.categories)) setCategories(cData.categories);
+        const cData = await catRes.json().catch(() => null);
+        if (Array.isArray(cData?.categories) && cData.categories.length > 0) {
+          setCategories(cData.categories);
+        }
       }
     } catch (err) {
-      console.error('Failed to load store context:', err);
+      console.warn('Using default store catalog fallback:', err);
     } finally {
       setLoading(false);
     }

@@ -3,14 +3,15 @@ import { Search } from 'lucide-react';
 import { ProductCard } from '../components/ProductCard';
 import { useCart } from '../context/CartContext';
 import { useStore } from '../context/StoreContext';
+import { DEFAULT_PRODUCTS } from '../data/fallbackCatalog';
 import type { Product } from '../types';
 
 export function CatalogPage() {
   const { categories } = useStore();
   const { syncWithCatalog } = useCart();
 
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [products, setProducts] = useState<Product[]>(DEFAULT_PRODUCTS);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>('semua');
   const [searchQuery, setSearchQuery] = useState('');
@@ -20,26 +21,20 @@ export function CatalogPage() {
 
   useEffect(() => {
     let active = true;
-    setLoading(true);
     fetch('/api/products')
       .then(async (res) => {
-        if (!res.ok) {
-          const errBody = await res.json().catch(() => null);
-          throw new Error(
-            errBody?.error ||
-              `Gagal memuat katalog menu (HTTP ${res.status}).`
-          );
-        }
-        return res.json();
+        if (!res.ok) return null;
+        return res.json().catch(() => null);
       })
       .then((data) => {
-        if (active && Array.isArray(data.products)) {
+        if (active && Array.isArray(data?.products) && data.products.length > 0) {
           setProducts(data.products);
           syncWithCatalog(data.products);
+          setError(null);
         }
       })
-      .catch((err) => {
-        if (active) setError(err.message || 'Gagal memuat katalog.');
+      .catch(() => {
+        // Keep built-in 12-item catalog fallback if API is unreachable
       })
       .finally(() => {
         if (active) setLoading(false);
