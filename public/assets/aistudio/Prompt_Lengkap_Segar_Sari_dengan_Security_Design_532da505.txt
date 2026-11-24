@@ -1,0 +1,799 @@
+# PROYEK: PENGEMBANGAN WEBSITE FULL-STACK UMKM SEGAR SARI
+
+Saya ingin mengembangkan website katalog jus buah **Segar Sari** yang saat ini masih berupa satu file HTML statis menjadi sebuah aplikasi website full-stack yang profesional, dinamis, responsif, dan siap dipublikasikan secara online.
+
+Saya sudah memiliki file HTML awal. Gunakan file tersebut sebagai REFERENSI UTAMA untuk desain, identitas merek, konten, dan data produk. Jangan membuang hasil pekerjaan yang sudah ada.
+
+## A. TUJUAN PENGEMBANGAN
+
+Bangun website bisnis UMKM yang mempunyai dua bagian utama:
+
+1. Website publik yang digunakan pelanggan untuk melihat katalog dan melakukan pemesanan.
+2. Dashboard admin yang digunakan pemilik usaha untuk mengelola produk, gambar, harga, informasi toko, dan pesanan.
+
+Website harus terhubung dengan database sehingga data dapat diperbarui tanpa mengedit kode program.
+
+## B. TEKNOLOGI YANG DIGUNAKAN
+
+Gunakan teknologi berikut:
+
+- Next.js dengan App Router.
+- TypeScript.
+- Tailwind CSS.
+- Supabase sebagai backend dan database PostgreSQL.
+- Supabase Auth untuk login admin.
+- Supabase Storage untuk menyimpan gambar produk.
+- GitHub untuk version control dan penyimpanan source code.
+- Vercel untuk hosting dan deployment.
+
+Gunakan versi teknologi yang stabil dan kompatibel.
+
+Jangan membuat aplikasi hanya menggunakan HTML statis. Migrasikan website lama ke struktur aplikasi Next.js yang benar.
+
+## C. MIGRASI WEBSITE HTML LAMA
+
+Sebelum mulai mengembangkan:
+
+1. Analisis seluruh kode HTML, CSS, dan JavaScript dari file yang saya unggah.
+2. Pertahankan identitas visual Segar Sari.
+3. Pertahankan warna hijau, krem, putih, dan aksen oranye.
+4. Pertahankan gaya desain katalog produk yang sudah ada.
+5. Pertahankan konten dan deskripsi produk yang relevan.
+6. Migrasikan gambar produk dengan benar.
+7. Perbaiki kesalahan kode dan konfigurasi yang ditemukan.
+8. Pisahkan komponen, halaman, styling, dan logika aplikasi agar mudah dikembangkan.
+
+Desain hasil migrasi harus tetap terasa seperti website Segar Sari yang sudah ada, tetapi lebih modern dan profesional.
+
+## D. WEBSITE PUBLIK
+
+Buat halaman berikut:
+
+### 1. Beranda
+
+- Header dengan logo Segar Sari.
+- Navigasi Beranda, Katalog, Tentang Kami, dan Kontak.
+- Hero section dengan foto jus berkualitas tinggi.
+- Judul dan deskripsi promosi.
+- Tombol Lihat Menu dan Pesan Sekarang.
+- Produk unggulan.
+- Keunggulan Segar Sari.
+- Ajakan untuk melakukan pemesanan.
+- Footer dengan informasi usaha.
+
+### 2. Katalog Produk
+
+Tampilkan 12 produk berikut:
+
+1. Jus Alpukat.
+2. Jus Mangga.
+3. Jus Jeruk.
+4. Jus Semangka.
+5. Jus Strawberry.
+6. Jus Buah Naga.
+7. Mango Strawberry.
+8. Alpukat Cokelat.
+9. Tropical Mix.
+10. Paket Sehat (2 gelas jus).
+11. Paket Keluarga (4 gelas jus).
+12. Paket Kantoran (6 gelas jus).
+
+Catatan: sesuaikan data paket dengan produk yang ada di file HTML lama. Gunakan nama Paket Kantoran untuk produk paket enam gelas dan jangan menggandakan produk yang sudah ada.
+
+Setiap produk harus memiliki:
+- Foto produk.
+- Nama.
+- Kategori.
+- Deskripsi.
+- Harga.
+- Status ketersediaan.
+- Tombol lihat detail.
+- Tombol tambah ke keranjang.
+
+Semua data produk harus berasal dari database Supabase, bukan ditulis permanen di komponen frontend.
+
+### 3. Detail Produk
+
+Buat halaman detail produk yang menampilkan:
+- Foto produk.
+- Nama dan kategori.
+- Deskripsi lengkap.
+- Harga.
+- Status ketersediaan.
+- Pilihan jumlah.
+- Tombol tambah ke keranjang.
+- Tombol pesan.
+
+### 4. Keranjang Belanja
+
+Buat fitur keranjang dengan kemampuan:
+- Menambahkan produk.
+- Mengurangi dan menambah kuantitas.
+- Menghapus produk.
+- Menampilkan subtotal.
+- Menghitung total pesanan.
+- Menampilkan ringkasan belanja.
+- Melanjutkan ke checkout.
+
+Keranjang harus tetap tersimpan ketika pelanggan berpindah halaman atau memuat ulang browser.
+
+### 5. Checkout dan Pemesanan
+
+Buat halaman checkout dengan:
+- Nama pelanggan.
+- Nomor WhatsApp.
+- Alamat pengiriman atau pilihan ambil sendiri.
+- Catatan pesanan.
+- Ringkasan produk.
+- Jumlah produk.
+- Total harga.
+
+Ketika pelanggan mengonfirmasi pesanan:
+1. Simpan data pesanan ke database Supabase.
+2. Buat nomor pesanan unik.
+3. Tampilkan ringkasan pesanan.
+4. Sediakan tombol untuk melanjutkan pemesanan ke WhatsApp.
+5. Buat pesan WhatsApp otomatis yang berisi nomor pesanan, nama pelanggan, daftar produk, jumlah, total, dan alamat.
+
+Gunakan nomor WhatsApp yang dapat diatur dari dashboard admin atau konfigurasi toko.
+
+Jangan mengklaim pembayaran berhasil karena belum ada integrasi payment gateway.
+
+### 6. Tentang Kami
+
+Buat halaman profil usaha Segar Sari yang menjelaskan:
+- Profil usaha.
+- Visi dan misi.
+- Komitmen terhadap kesegaran buah.
+- Keunggulan produk.
+
+### 7. Kontak
+
+Tampilkan:
+- Nomor WhatsApp.
+- Alamat usaha.
+- Jam operasional.
+- Media sosial.
+- Tombol hubungi kami.
+
+Gunakan data yang dapat diedit melalui dashboard admin.
+
+## E. DASHBOARD ADMIN
+
+Buat dashboard admin terpisah dengan URL `/admin`.
+
+Dashboard harus memiliki autentikasi menggunakan Supabase Auth.
+
+Hanya admin yang sudah login dan memiliki izin yang sesuai yang dapat mengakses dashboard.
+
+### 1. Dashboard Utama
+
+Tampilkan:
+- Total produk.
+- Total pesanan.
+- Pesanan baru.
+- Pesanan selesai.
+- Ringkasan penjualan.
+- Daftar pesanan terbaru.
+
+### 2. Manajemen Produk
+
+Buat fitur CRUD lengkap:
+- Tambah produk.
+- Edit produk.
+- Hapus produk.
+- Upload foto produk.
+- Ganti foto produk.
+- Atur nama.
+- Atur deskripsi.
+- Atur kategori.
+- Atur harga.
+- Atur stok atau ketersediaan.
+- Atur produk unggulan.
+
+Foto produk disimpan di Supabase Storage, sedangkan informasi produknya disimpan di database.
+
+### 3. Manajemen Pesanan
+
+Admin dapat:
+- Melihat semua pesanan.
+- Melihat detail pesanan.
+- Mencari pesanan.
+- Memfilter berdasarkan tanggal.
+- Memfilter berdasarkan status.
+- Mengubah status pesanan.
+
+Gunakan status:
+- Menunggu konfirmasi.
+- Diproses.
+- Siap diambil atau dikirim.
+- Selesai.
+- Dibatalkan.
+
+### 4. Pengaturan Toko
+
+Admin dapat mengubah:
+- Nama toko.
+- Deskripsi toko.
+- Nomor WhatsApp.
+- Alamat.
+- Jam operasional.
+- Email.
+- Media sosial.
+- Logo.
+- Foto banner.
+
+Semua pengaturan harus tersimpan di database.
+
+## F. DATABASE SUPABASE
+
+Buat database PostgreSQL dengan tabel minimal berikut:
+
+### 1. products
+Kolom:
+- id.
+- name.
+- slug.
+- description.
+- price.
+- category_id.
+- image_url.
+- is_available.
+- is_featured.
+- created_at.
+- updated_at.
+
+### 2. categories
+Kolom:
+- id.
+- name.
+- slug.
+- description.
+
+### 3. orders
+Kolom:
+- id.
+- order_number.
+- customer_name.
+- customer_phone.
+- delivery_address.
+- order_type.
+- notes.
+- subtotal.
+- total.
+- status.
+- created_at.
+
+### 4. order_items
+Kolom:
+- id.
+- order_id.
+- product_id.
+- product_name.
+- price.
+- quantity.
+- subtotal.
+
+Simpan snapshot nama dan harga produk pada order_items agar riwayat transaksi tidak berubah ketika produk diedit.
+
+### 5. store_settings
+Kolom:
+- id.
+- store_name.
+- description.
+- whatsapp_number.
+- address.
+- opening_hours.
+- email.
+- instagram.
+- logo_url.
+- banner_url.
+
+Buat SQL migration atau SQL schema yang dapat dijalankan di Supabase.
+
+Tambahkan foreign key, indeks, validasi, dan kebijakan Row Level Security (RLS).
+
+Pastikan:
+- Pengunjung hanya dapat membaca produk yang tersedia.
+- Pelanggan dapat membuat pesanan tanpa akses ke data pesanan pelanggan lain.
+- Admin dapat mengelola produk, pesanan, dan pengaturan.
+- Kredensial rahasia tidak pernah dikirim ke frontend.
+- Service role key tidak pernah diekspos ke browser.
+
+## G. DESAIN UI/UX
+
+Pertahankan identitas visual dari HTML awal.
+
+Kembangkan desain menjadi:
+- Modern.
+- Minimalis.
+- Profesional.
+- Fresh dan natural.
+- Mudah digunakan.
+- Responsif di desktop, tablet, dan smartphone.
+
+Gunakan warna utama hijau, putih, krem, dan oranye.
+
+Gunakan foto produk yang realistis, bukan ilustrasi kartun.
+
+Buat loading state, empty state, error state, notifikasi sukses, dan konfirmasi sebelum penghapusan data.
+
+## H. STRUKTUR PROYEK
+
+Gunakan struktur proyek yang terorganisasi. Contoh:
+
+- app/
+  - page.tsx
+  - katalog/
+  - produk/
+  - keranjang/
+  - checkout/
+  - tentang/
+  - kontak/
+  - admin/
+  - api/
+- components/
+- lib/
+- hooks/
+- types/
+- public/
+- supabase/
+  - migrations/
+
+Silakan sesuaikan struktur jika ada pendekatan Next.js yang lebih baik.
+
+Pisahkan komponen frontend, fungsi database, validasi, autentikasi, dan konfigurasi.
+
+## I. KEAMANAN DAN KUALITAS
+
+- Gunakan validasi input.
+- Lindungi halaman admin.
+- Gunakan RLS pada tabel Supabase.
+- Validasi harga dan jumlah di sisi server.
+- Jangan mempercayai total harga yang dikirim browser.
+- Tangani error database dengan baik.
+- Lindungi endpoint yang membutuhkan hak admin.
+- Jangan menyimpan password dalam kode.
+- Gunakan environment variables.
+- Jangan masukkan file `.env` ke GitHub.
+
+Buat file `.env.example` dengan nama variabel yang dibutuhkan, tanpa nilai rahasia.
+
+## J. GITHUB DAN VERCEL
+
+Siapkan aplikasi agar dapat dikembangkan menggunakan GitHub dan dideploy ke Vercel.
+
+Pastikan:
+1. Project dapat dijalankan secara lokal.
+2. Project mempunyai `package.json` dan konfigurasi yang benar.
+3. Project dapat di-build tanpa error.
+4. File `.gitignore` sudah benar.
+5. Tersedia `.env.example`.
+6. Tersedia README.md berisi petunjuk instalasi.
+7. Tersedia petunjuk konfigurasi Supabase.
+8. Tersedia petunjuk push ke GitHub.
+9. Tersedia petunjuk menghubungkan repository ke Vercel.
+10. Tersedia daftar environment variables yang harus diatur di Vercel.
+
+Pastikan aplikasi siap menggunakan integrasi GitHub Repository ke Vercel sehingga setiap push ke branch utama dapat memicu deployment otomatis.
+
+## K. TAHAPAN PENGERJAAN
+
+Kerjakan proyek secara bertahap dan jangan langsung membuat seluruh sistem tanpa pengujian.
+
+Tahap 1: Audit HTML lama dan migrasi desain ke Next.js.
+
+Tahap 2: Membuat struktur aplikasi dan komponen frontend.
+
+Tahap 3: Menghubungkan Supabase dan membuat database.
+
+Tahap 4: Menghubungkan katalog produk dengan database.
+
+Tahap 5: Membuat keranjang dan checkout.
+
+Tahap 6: Membuat dashboard admin dan autentikasi.
+
+Tahap 7: Membuat manajemen produk, pesanan, dan pengaturan toko.
+
+Tahap 8: Pengujian seluruh fitur dan perbaikan bug.
+
+Tahap 9: Persiapan GitHub dan Vercel.
+
+Pada setiap tahap:
+- Jelaskan perubahan yang sudah dilakukan.
+- Berikan daftar file yang dibuat atau diubah.
+- Pastikan fitur berjalan.
+- Jangan menghapus pekerjaan sebelumnya.
+- Jika ada konfigurasi eksternal yang memerlukan tindakan saya, jelaskan langkahnya secara rinci.
+
+## L. HASIL AKHIR
+
+Saya menginginkan aplikasi website Segar Sari yang benar-benar berfungsi, bukan sekadar mockup atau tampilan visual.
+
+Hasil akhir harus mencakup:
+1. Source code aplikasi Next.js lengkap.
+2. Website publik.
+3. Dashboard admin.
+4. Database Supabase.
+5. Sistem upload gambar.
+6. Sistem pemesanan dan checkout.
+7. Integrasi WhatsApp.
+8. Sistem autentikasi admin.
+9. README dan panduan instalasi.
+10. Panduan GitHub dan deployment Vercel.
+
+Mulailah dengan mengaudit file HTML yang sudah saya unggah, kemudian buat rencana migrasi dan lanjutkan implementasi proyek secara bertahap.
+
+Jangan berhenti pada desain. Implementasikan fitur yang benar-benar terhubung ke database dan dapat digunakan.
+
+## M. SECURITY DESIGN DAN PERLINDUNGAN APLIKASI
+
+Bangun sistem keamanan (security design) secara menyeluruh untuk melindungi website Segar Sari, dashboard admin, database, transaksi pelanggan, dan informasi sensitif.
+
+Keamanan harus diterapkan sejak tahap perancangan arsitektur, bukan hanya ditambahkan setelah aplikasi selesai dibuat.
+
+Gunakan prinsip:
+- Security by Design.
+- Defense in Depth.
+- Least Privilege.
+- Zero Trust.
+- Secure by Default.
+- Fail Securely.
+
+Jangan hanya membuat fitur keamanan secara visual. Seluruh mekanisme keamanan harus benar-benar diterapkan dan diuji.
+
+### 1. Security Architecture
+
+Rancang arsitektur keamanan dengan pemisahan yang jelas antara:
+- Public Frontend: halaman yang dapat diakses pengunjung.
+- Admin Frontend: dashboard khusus administrator.
+- Server-side Application: pemrosesan data dan validasi transaksi.
+- Authentication Layer: autentikasi pengguna dan admin.
+- Authorization Layer: pemeriksaan hak akses.
+- Database Layer: penyimpanan data dengan kebijakan RLS.
+- Storage Layer: penyimpanan gambar produk.
+- External Integration: integrasi WhatsApp dan layanan eksternal.
+
+Jangan memberikan akses database atau hak administratif secara langsung kepada browser. Semua operasi sensitif harus melewati server-side validation dan authorization.
+
+### 2. Autentikasi Admin
+
+Terapkan autentikasi admin menggunakan Supabase Auth dengan ketentuan:
+- Tidak menyediakan fitur registrasi admin secara publik.
+- Hanya akun yang telah diotorisasi yang dapat menjadi admin.
+- Password tidak boleh disimpan secara manual di database aplikasi.
+- Gunakan mekanisme autentikasi Supabase yang aman.
+- Terapkan validasi sesi pada setiap akses dashboard.
+- Terapkan pemeriksaan identitas dan hak akses di server.
+- Sediakan fitur logout yang mengakhiri sesi dengan benar.
+- Lindungi halaman dan endpoint admin dari akses tanpa autentikasi.
+- Tangani sesi kedaluwarsa dan kegagalan autentikasi.
+- Gunakan autentikasi multifaktor (MFA) untuk akun admin jika tersedia dan kompatibel.
+- Jangan mengandalkan status login yang disimpan di localStorage sebagai bukti autentikasi.
+
+Jangan hanya menyembunyikan tombol atau halaman admin di frontend. Setiap permintaan ke fungsi administratif harus diverifikasi kembali di server.
+
+### 3. Authorization dan Role-Based Access Control
+
+Terapkan Role-Based Access Control (RBAC). Untuk tahap awal, gunakan setidaknya dua jenis akses:
+1. Public: pengunjung dan pelanggan.
+2. Admin: pemilik usaha atau administrator yang telah diotorisasi.
+
+Ketentuan:
+- Pengunjung hanya dapat mengakses informasi publik.
+- Pengunjung tidak dapat membuka dashboard admin.
+- Pengunjung tidak dapat mengubah produk, harga, stok, atau pengaturan toko.
+- Pengunjung tidak dapat melihat daftar pesanan atau informasi pribadi pelanggan lain.
+- Admin dapat mengelola produk, pesanan, dan pengaturan toko.
+- Hak admin harus diverifikasi di server dan database.
+- Pengguna tidak boleh dapat meningkatkan hak aksesnya sendiri.
+- Role admin tidak boleh ditentukan berdasarkan input dari browser.
+
+Jika di kemudian hari diperlukan beberapa jenis admin, arsitektur harus dapat dikembangkan menjadi role yang lebih terperinci.
+
+### 4. Keamanan Database Supabase dan RLS
+
+Aktifkan Row Level Security (RLS) pada seluruh tabel yang dapat diakses melalui Supabase API. Buat kebijakan akses yang spesifik untuk setiap tabel.
+
+**Tabel products**
+- Pengunjung hanya dapat membaca produk yang tersedia dan memang dipublikasikan.
+- Hanya admin yang dapat menambah, mengubah, dan menghapus produk.
+- Pengunjung tidak dapat mengubah harga, stok, kategori, atau status produk.
+
+**Tabel categories**
+- Pengunjung hanya dapat membaca kategori yang digunakan untuk katalog publik.
+- Hanya admin yang dapat mengelola kategori.
+
+**Tabel orders**
+- Pelanggan tidak boleh membaca seluruh daftar pesanan.
+- Pelanggan tidak boleh membaca pesanan pelanggan lain.
+- Pembuatan pesanan publik harus dilakukan melalui endpoint server yang tervalidasi atau mekanisme database khusus dengan hak minimum.
+- Admin yang terotorisasi dapat membaca dan mengelola pesanan.
+- Hanya admin yang dapat mengubah status pesanan.
+
+**Tabel order_items**
+- Data item pesanan tidak boleh dapat diakses secara bebas oleh pengunjung.
+- Akses harus mengikuti otorisasi terhadap pesanan terkait.
+- Snapshot nama produk, harga, kuantitas, dan subtotal harus konsisten dengan hasil validasi server.
+
+**Tabel store_settings**
+- Pengunjung hanya dapat membaca informasi toko yang memang ditujukan untuk publik.
+- Hanya admin yang dapat mengubah pengaturan toko.
+
+Jangan menggunakan kebijakan RLS yang terlalu longgar seperti memberikan akses penuh kepada role anon atau authenticated tanpa pembatasan. Jangan menonaktifkan RLS hanya untuk mengatasi error aplikasi.
+
+Buat SQL migration yang berisi:
+- Aktivasi RLS.
+- Kebijakan SELECT, INSERT, UPDATE, dan DELETE.
+- Pemeriksaan role admin.
+- Foreign key.
+- Unique constraint.
+- Check constraint.
+- Indeks yang diperlukan.
+
+Uji seluruh kebijakan menggunakan role anon, authenticated, dan admin.
+
+### 5. Keamanan Checkout dan Integritas Transaksi
+
+Checkout merupakan bagian penting yang harus dilindungi dari manipulasi.
+
+Jangan pernah mempercayai:
+- Harga produk yang dikirim browser.
+- Subtotal yang dihitung browser.
+- Total pembayaran yang dikirim browser.
+- Status pesanan yang dikirim browser.
+- Identitas admin yang dikirim browser.
+
+Saat pelanggan membuat pesanan:
+1. Browser hanya mengirimkan identitas kontak pelanggan, jenis pesanan, alamat jika diperlukan, catatan, dan daftar ID produk beserta kuantitas.
+2. Server mengambil harga dan status ketersediaan produk langsung dari database.
+3. Server memvalidasi setiap ID produk.
+4. Server memastikan produk masih tersedia.
+5. Server memastikan kuantitas berupa bilangan bulat positif dan tidak melebihi batas yang ditentukan.
+6. Server menghitung ulang subtotal dan total.
+7. Server membuat nomor pesanan unik.
+8. Server menyimpan pesanan dan item pesanan secara konsisten dalam satu transaksi database.
+9. Server mengembalikan nomor pesanan dan ringkasan yang telah divalidasi.
+
+Gunakan transaksi database atau mekanisme RPC yang aman agar pesanan dan item pesanan tidak tersimpan sebagian ketika terjadi kegagalan.
+
+Tambahkan:
+- Unique constraint untuk order_number.
+- Validasi panjang dan format nomor WhatsApp.
+- Batas maksimum jumlah item dan kuantitas.
+- Pencegahan duplikasi pesanan akibat pengiriman ulang permintaan.
+- Idempotency key atau mekanisme setara untuk mencegah pesanan ganda.
+- Validasi alamat dan catatan pelanggan.
+- Penanganan kegagalan database tanpa membocorkan informasi internal.
+
+Pelanggan hanya boleh membuat pesanan baru. Pelanggan tidak boleh menentukan sendiri status pesanan atau mengubah total transaksi.
+
+Jangan menganggap tombol WhatsApp sebagai bukti pembayaran. Status pembayaran tidak boleh ditandai lunas tanpa integrasi dan verifikasi payment gateway.
+
+### 6. Keamanan API dan Server Actions
+
+Seluruh API route, server actions, dan fungsi backend harus menerapkan pemeriksaan keamanan yang sesuai.
+
+Ketentuan:
+- Validasi seluruh data yang masuk.
+- Gunakan schema validation seperti Zod atau library setara.
+- Terapkan autentikasi dan authorization pada setiap endpoint sensitif.
+- Jangan mengandalkan validasi frontend.
+- Batasi metode HTTP yang diperbolehkan.
+- Tangani error secara aman.
+- Jangan mengirim stack trace, query SQL, token, atau informasi internal kepada pengguna.
+- Terapkan rate limiting untuk endpoint login, checkout, dan endpoint yang berpotensi disalahgunakan.
+- Batasi ukuran request dan file upload.
+- Cegah penyalahgunaan endpoint melalui pengiriman request berulang.
+- Jangan menyediakan endpoint administratif tanpa pemeriksaan role.
+
+Untuk operasi yang menggunakan Supabase service role key, jalankan hanya di lingkungan server yang benar-benar terlindungi. Jangan pernah mengekspos key tersebut melalui response API, source code frontend, atau browser.
+
+### 7. Perlindungan dari Serangan Web Umum
+
+**Cross-Site Scripting (XSS)**
+- Hindari rendering HTML mentah dari input pengguna.
+- Lakukan sanitasi konten jika HTML memang perlu ditampilkan.
+- Gunakan mekanisme escaping bawaan React.
+- Terapkan Content Security Policy (CSP) yang sesuai dengan kebutuhan aplikasi.
+
+**Cross-Site Request Forgery (CSRF)**
+- Lindungi operasi yang mengubah data menggunakan mekanisme CSRF yang sesuai dengan arsitektur autentikasi.
+- Periksa origin untuk permintaan yang relevan.
+- Gunakan cookie dengan konfigurasi Secure, HttpOnly, dan SameSite yang sesuai.
+
+**SQL Injection**
+- Gunakan query builder atau parameterized query.
+- Jangan menyusun query SQL dari input pengguna secara langsung.
+- Validasi seluruh parameter pencarian dan filter.
+
+**Broken Access Control**
+- Verifikasi hak akses di server dan RLS.
+- Jangan menganggap URL yang tidak diketahui atau tersembunyi sebagai perlindungan.
+- Uji akses langsung ke URL dashboard dan endpoint administratif.
+
+**Brute Force dan Abuse**
+- Terapkan rate limiting.
+- Gunakan perlindungan login yang tersedia pada Supabase Auth.
+- Batasi percobaan berulang pada endpoint sensitif.
+- Berikan respons error yang tidak mengungkap apakah suatu akun admin terdaftar.
+
+### 8. Keamanan Upload dan Penyimpanan Gambar
+
+Gunakan Supabase Storage untuk gambar produk dengan kebijakan keamanan yang tepat.
+
+Ketentuan:
+- Hanya admin yang terotorisasi dapat mengunggah, mengganti, dan menghapus gambar produk.
+- Pengunjung hanya dapat membaca gambar yang memang dipublikasikan.
+- Batasi ukuran file.
+- Batasi jenis file ke format gambar yang diperbolehkan, misalnya JPEG, PNG, dan WebP.
+- Validasi MIME type dan signature file di server.
+- Jangan hanya mengandalkan ekstensi file.
+- Buat nama file yang aman dan unik.
+- Tolak file yang tidak sesuai dengan format yang diperbolehkan.
+- Jangan mengizinkan upload file executable atau HTML.
+- Jangan menggunakan nama file dari pengguna secara langsung sebagai path penyimpanan.
+- Pastikan file yang dihapus atau diganti tidak meninggalkan referensi gambar rusak.
+
+Atur Storage Policies agar akses tulis tidak terbuka untuk publik.
+
+### 9. Perlindungan Environment Variables dan Secrets
+
+Gunakan environment variables untuk seluruh konfigurasi rahasia.
+
+Contoh:
+- NEXT_PUBLIC_SUPABASE_URL.
+- NEXT_PUBLIC_SUPABASE_ANON_KEY.
+- SUPABASE_SERVICE_ROLE_KEY.
+- Variabel rahasia lain yang memang diperlukan.
+
+Ketentuan:
+- Hanya variabel yang memang aman untuk publik yang boleh menggunakan prefix NEXT_PUBLIC_.
+- Service role key wajib berada di server.
+- Jangan memasukkan password atau API secret ke source code.
+- Jangan mengirim secrets ke frontend.
+- Jangan menyimpan secrets di GitHub.
+- Pastikan file .env masuk ke .gitignore.
+- Buat .env.example tanpa nilai rahasia.
+- Atur environment variables secara terpisah untuk development dan production.
+- Jangan mencetak secrets ke console, log, atau pesan error.
+- Jika secrets terlanjur terekspos, dokumentasikan langkah rotasi dan pencabutannya.
+
+### 10. Security Headers dan Konfigurasi Deployment
+
+Konfigurasikan security headers pada aplikasi Next.js dan lingkungan production.
+
+Terapkan sesuai kompatibilitas aplikasi:
+- Content-Security-Policy.
+- Strict-Transport-Security (HSTS) pada domain HTTPS production.
+- X-Content-Type-Options: nosniff.
+- Referrer-Policy.
+- Permissions-Policy.
+- Proteksi framing menggunakan frame-ancestors dalam CSP atau konfigurasi setara.
+
+Pastikan:
+- Website production menggunakan HTTPS.
+- Cookie sesi menggunakan konfigurasi keamanan yang tepat.
+- Tidak ada halaman sensitif yang di-cache secara publik.
+- Response API yang berisi data pribadi tidak menggunakan cache publik.
+- Konfigurasi preview deployment Vercel tidak memberikan akses ke data production secara sembarangan.
+- Environment variables production dan preview dikelola dengan benar.
+
+Jangan memasang CSP yang sekadar terlihat aman tetapi menyebabkan aplikasi tidak berfungsi. Uji seluruh halaman setelah konfigurasi.
+
+### 11. Perlindungan Data dan Privasi Pelanggan
+
+Lindungi data pribadi pelanggan, khususnya:
+- Nama.
+- Nomor WhatsApp.
+- Alamat pengiriman.
+- Catatan pesanan.
+- Riwayat transaksi.
+
+Terapkan prinsip data minimization:
+- Hanya kumpulkan data yang diperlukan untuk pemesanan.
+- Jangan meminta informasi pribadi yang tidak relevan.
+- Jangan menampilkan nomor WhatsApp dan alamat pelanggan kepada publik.
+- Batasi akses data pelanggan hanya untuk pihak yang berwenang.
+- Jangan mencantumkan data pribadi dalam URL.
+- Jangan menyimpan informasi pembayaran yang tidak diperlukan.
+- Hindari memasukkan data pelanggan ke log aplikasi.
+- Sediakan kebijakan privasi yang menjelaskan data yang dikumpulkan dan penggunaannya.
+- Tentukan kebijakan retensi dan penghapusan data yang sesuai dengan kebutuhan operasional dan ketentuan yang berlaku.
+
+### 12. Logging, Monitoring, dan Penanganan Insiden
+
+Buat mekanisme pencatatan aktivitas keamanan yang relevan.
+
+Catat aktivitas seperti:
+- Login admin berhasil atau gagal.
+- Perubahan data produk.
+- Penghapusan produk.
+- Perubahan pengaturan toko.
+- Perubahan status pesanan.
+- Aktivitas administratif penting lainnya.
+
+Ketentuan:
+- Jangan mencatat password, token, API key, atau informasi sensitif.
+- Batasi akses terhadap log.
+- Catat waktu aktivitas dan identitas admin yang melakukan perubahan.
+- Gunakan pesan error yang aman.
+- Sediakan mekanisme untuk mendeteksi kegagalan berulang dan aktivitas mencurigakan.
+- Dokumentasikan prosedur penanganan jika akun admin atau kredensial diketahui telah bocor.
+
+### 13. Keamanan Dependensi dan Source Code
+
+Periksa keamanan dependensi yang digunakan.
+
+Terapkan:
+- Gunakan package yang aktif dipelihara.
+- Hindari dependensi yang tidak diperlukan.
+- Jalankan pemeriksaan vulnerability pada dependensi.
+- Gunakan lockfile.
+- Periksa hasil npm audit atau alat pemeriksaan setara.
+- Perbaiki kerentanan kritis dan tinggi sebelum deployment production.
+- Jangan memasukkan file hasil build, secrets, atau file konfigurasi lokal ke GitHub.
+- Jangan mengeksekusi input pengguna sebagai kode.
+
+### 14. Backup dan Recovery
+
+Rancang perlindungan terhadap kehilangan data.
+
+Ketentuan:
+- Dokumentasikan strategi backup database Supabase.
+- Tentukan mekanisme pemulihan data.
+- Pastikan pemilik usaha mengetahui cara melakukan restore.
+- Jangan menganggap sinkronisasi GitHub sebagai backup database.
+- Dokumentasikan pemulihan ketika terjadi kerusakan database, kehilangan akses admin, atau penghapusan data tidak sengaja.
+
+### 15. Security Testing dan Acceptance Criteria
+
+Sebelum aplikasi dinyatakan selesai, lakukan pengujian keamanan.
+
+Minimal lakukan skenario berikut:
+1. Pengunjung mencoba membuka `/admin` tanpa login.
+2. Pengunjung mencoba mengakses endpoint admin secara langsung.
+3. Pengguna biasa mencoba mengubah harga produk.
+4. Pengunjung mencoba membaca pesanan pelanggan lain.
+5. Pelanggan mencoba mengubah total harga melalui browser.
+6. Pelanggan mencoba mengirim kuantitas negatif atau sangat besar.
+7. Pelanggan mencoba membuat pesanan untuk produk yang sudah tidak tersedia.
+8. Pengguna mencoba mengirim request checkout berulang.
+9. Pengguna mencoba mengunggah file non-gambar.
+10. Pengguna mencoba mengunggah gambar dengan ukuran berlebihan.
+11. Pengguna mencoba memasukkan script atau payload XSS pada input.
+12. Pengguna mencoba memasukkan karakter berbahaya pada kolom pencarian dan formulir.
+13. Pengguna mencoba mengakses data menggunakan Supabase anon key di luar izin RLS.
+14. Pastikan service role key tidak ditemukan pada bundle frontend.
+15. Pastikan data pribadi pelanggan tidak muncul pada halaman publik, log, atau response yang tidak berwenang.
+
+Semua pengujian harus dilakukan pada lingkungan development atau staging dengan data uji, bukan dengan merusak data production.
+
+Buat dokumentasi hasil pengujian yang berisi:
+- Skenario pengujian.
+- Hasil yang diharapkan.
+- Hasil aktual.
+- Status lulus atau gagal.
+- Perbaikan yang dilakukan.
+
+**Kriteria kelulusan keamanan:**
+- Tidak ada akses admin tanpa otorisasi.
+- Tidak ada kebocoran data pesanan pelanggan.
+- Tidak ada manipulasi harga melalui frontend.
+- RLS aktif dan telah diuji pada seluruh tabel yang relevan.
+- Tidak ada secret yang terekspos ke browser atau repository.
+- Upload gambar memiliki validasi dan pembatasan.
+- Endpoint sensitif memiliki autentikasi, authorization, validasi, dan rate limiting yang sesuai.
+- Tidak ada kerentanan kritis atau tinggi yang belum ditangani.
+
+Jangan menyatakan aplikasi aman hanya karena semua fitur dapat berjalan. Laporkan pengujian yang benar-benar dilakukan dan jangan mengklaim telah melakukan penetration testing jika pengujian tersebut tidak dilakukan.
+
+## N. PENYESUAIAN WAJIB PADA BAGIAN LAIN
+
+Ketentuan keamanan pada bagian M harus menjadi standar wajib untuk seluruh bagian prompt. Secara khusus:
+
+1. Pada bagian F (Database Supabase), jangan memberikan izin INSERT pesanan secara bebas kepada pengguna anonim. Gunakan endpoint server atau RPC yang tervalidasi untuk membuat pesanan, tanpa memberikan izin membaca pesanan pelanggan lain.
+2. Pada bagian I (Keamanan dan Kualitas), pertahankan seluruh persyaratan awal dan lengkapi implementasinya sesuai bagian M.
+3. Semua pemeriksaan hak akses harus dilakukan di server dan database, bukan hanya melalui pembatasan tampilan frontend.
+4. Jika ada instruksi lain yang bertentangan dengan ketentuan keamanan, prioritaskan implementasi yang paling aman tanpa menghilangkan fitur bisnis yang diminta.
+5. Jangan menyatakan fitur keamanan telah selesai sebelum implementasi dan pengujiannya benar-benar dilakukan.

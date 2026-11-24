@@ -1,0 +1,6 @@
+{
+  "name": "Segar Sari",
+  "description": "Katalog dan pemesanan jus buah segar alami Segar Sari dengan keranjang belanja, checkout WhatsApp tervalidasi, analisis foto buah Gemini, dan dashboard admin.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
